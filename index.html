@@ -27,6 +27,7 @@ body {
   background-color: #fff !important;
   background-image: none !important;
   text-align: center !important;
+  vertical-align: 60px;
 
   color: #000 !important;
   transform: rotateY(360deg) !important;
@@ -80,15 +81,19 @@ body {
   float: left;
   text-align: center;
 
-  color: #c12d2d;
+  color: rgba(0, 0, 0, 0);
   background-color: #c12d2d;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%233a2e32' fill-opacity='0.9'%3E%3Cpath fill-rule='evenodd' d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2V0zm0 4l4-4h2l-6 6V4zm0 4l8-8h2L40 10V8zm0 4L52 0h2L40 14v-2zm0 4L56 0h2L40 18v-2zm0 4L60 0h2L40 22v-2zm0 4L64 0h2L40 26v-2zm0 4L68 0h2L40 30v-2zm0 4L72 0h2L40 34v-2zm0 4L76 0h2L40 38v-2zm0 4L80 0v2L42 40h-2zm4 0L80 4v2L46 40h-2zm4 0L80 8v2L50 40h-2zm4 0l28-28v2L54 40h-2zm4 0l24-24v2L58 40h-2zm4 0l20-20v2L62 40h-2zm4 0l16-16v2L66 40h-2zm4 0l12-12v2L70 40h-2zm4 0l8-8v2l-6 6h-2zm4 0l4-4v2l-2 2h-2z'/%3E%3C/g%3E%3C/svg%3E");
   margin: 5px;
-  line-height: 120px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
   border-radius: 3px;
   border: 2px solid #3a2e32;
-  text-align: left;
-
+  
   box-shadow: 0 5px 10px #000;
 
   perspective: 1500px;
@@ -98,7 +103,7 @@ body {
   transition: transform 0.7s;
 
   &:hover {
-    color: #a32626;
+    color: rgba(0, 0, 0, 0);
     background-color: #a32626;
     cursor: pointer;
   }
@@ -179,6 +184,7 @@ body {
 }
 </style>
 <body>
+  
 <div id="info-box"></div>
 
 <div id="game-container">
@@ -209,6 +215,14 @@ body {
 <script>
 const gameBoard_dealer = document.getElementById('game-board-dealer');
 const gameBoard_player = document.getElementById('game-board-player');
+
+const infoBox = document.getElementById('info-box');
+
+const elem_spinbox = document.getElementById('settings-box');
+const btn_start = document.getElementById('start');
+const btn_hit = document.getElementById('hit');
+const btn_stand = document.getElementById('stand');
+
 const suits = ['Hearts', 'Diamonds', 'Spades', 'Clubs']; 
 const ranks = ['Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace']
 const values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 'Nine':9, 'Ten':10, 'Jack':10,'Queen':10, 'King':10, 'Ace':11};
@@ -288,7 +302,7 @@ class Chips{
     this.bet = 0; 
   }
   win_bet(){
-    this.total +=this.bet;
+    this.total +=parseInt(this.bet);
   }
   lose_bet(){
     this.total -=this.bet;
@@ -402,7 +416,11 @@ function show_all(){
 
   gameBoard_player.innerHTML = "";
   setupCards(player_hand.cards, gameBoard_player, false);
-
+  
+  elem_spinbox.removeAttribute("disabled");
+  btn_start.removeAttribute("disabled");
+  btn_hit.setAttribute("disabled","");
+  btn_stand.setAttribute("disabled","");
 }
 
 
@@ -411,29 +429,35 @@ function player_busts(player, dealer, chips){
   console.log('Игрок проиграл');
   scoreCards(player, dealer);
   chips.lose_bet();
+  infoBox.innerHTML =`<p>Player lose!</p>`;
 }
 
 function player_wins(player, dealer, chips){
   console.log('Игрок выйграл');
   scoreCards(player, dealer);
   chips.win_bet();
+  infoBox.innerHTML =`<p>Player win!</p>`;
 }
 
 function dealer_busts(player, dealer, chips){
   console.log('Дилер проиграл');
   scoreCards(player, dealer);
-  chips.lose_bet();
+  //chips.lose_bet();
+  chips.win_bet()
+  infoBox.innerHTML =`<p>Player win!</p>`;
 }
 
 function dealer_wins(player, dealer, chips){
   console.log('дилер выйграл');
   scoreCards(player, dealer);
   chips.lose_bet();
+  infoBox.innerHTML =`<p>Player lose!</p>`;
 }
 
 function push(player, dealer){
   console.log('ничья');
   scoreCards(player, dealer);
+  infoBox.innerHTML =`<p>Draw!</p>`;
 }
 
 function scoreCards(player, dealer){
@@ -511,6 +535,11 @@ while (true){
 }
 */
 function setupGame(){
+  updateInfoBox();
+  elem_spinbox.setAttribute("disabled","");
+  btn_start.setAttribute("disabled","");
+  btn_hit.removeAttribute("disabled");
+  btn_stand.removeAttribute("disabled");
   deck =  new Deck();
   deck.shuffle();
 
@@ -567,11 +596,21 @@ function check(){
       push(player_hand, dealer_hand);
     }
     show_all();
+    
 
   }
   playing = true;
+  
 
 }
+
+function updateInfoBox(){
+  infoBox.innerHTML =`<p>Coins: ${player_chips.total}</p>`
+}
+//elem_spinbox = document.getElementById('settings-box');
+//btn_start = document.getElementById('start');
+btn_hit.setAttribute("disabled","");
+btn_stand.setAttribute("disabled","");
 var deck;
 var player_hand;
 var dealer_hand;
